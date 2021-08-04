@@ -4,11 +4,12 @@
 
 #include "Arduino2.h"
 #include <Arduino.h>
-
 /**
  * Tiene que revisar que comandoes voy a correr
  * @return
  */
+
+
 Command ArduinoInter::check_buttons() {
     Command comando;
     comando.command = 0;
@@ -50,6 +51,8 @@ int ArduinoInter::bring_up() {
 int ArduinoInter::setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     pinMode(PIN3, INPUT_PULLUP);
+    Serial.begin(9600);
+
     return 0;
 }
 

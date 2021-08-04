@@ -3,6 +3,7 @@
 //
 
 #include "GlobalState.h"
+#include <Arduino.h>
 
 int GlobalState::proximo_stado(int state) {
     this->current_state = state;
@@ -11,5 +12,8 @@ int GlobalState::proximo_stado(int state) {
 }
 
 int GlobalState::leer_stado() const {
+    if (Serial.available()){
+        Serial.print(this->current_state );
+    }
     return this->current_state;
 }

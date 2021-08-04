@@ -39,7 +39,6 @@ public:
 
     void reset();
 
-
     int get_door_status();
 
     int get_command();
