@@ -1,9 +1,9 @@
 
 
 
+#include <Arduino.h>
 #include "ElevatorClass.h"
 #include "StateMachine.h"
-#include <Arduino.h>
 #define FIRMWARE_VERSION 10001
 ElevatorClass  elevator; //EStado elevador
 GlobalState  globalState; // Estado GlobaL
@@ -19,6 +19,10 @@ void setup()
 
 void loop()
 {
-   elevator.blink();
+    elevator.blink();
+    while (globalState.errors){
+        run_state_machine(&elevator, &globalState);
+    }
+//    run_resolve_error(&elevator, &globalState);
 
 }

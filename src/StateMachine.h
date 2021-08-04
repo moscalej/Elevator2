@@ -7,8 +7,8 @@
 
 #include "ElevatorClass.h"
 #include "GlobalState.h"
-int run_state_machine(ElevatorClass * elevator, GlobalState * globalState);
 
+int run_state_machine(ElevatorClass * elevator, GlobalState * globalState);
 int run_resolve_error(ElevatorClass * elevatorStates,  GlobalState * globalState);
 
 
