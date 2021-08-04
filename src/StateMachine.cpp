@@ -33,7 +33,7 @@ int run_state_machine(ElevatorClass *elevator, GlobalState *globalState) {
             break;
 
         case NO_HAGAS_NADA_PUERTA_ABIERTA:
-            command = elevator->get_command();
+            elevator->get_command();
             if (elevator->get_door_status() == CLOSE) {
                 globalState->proximo_stado(STAND_BY_CLOSE_DOOR);
 

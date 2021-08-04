@@ -12,6 +12,7 @@ void setup()
 
     elevator.setup();
     globalState.proximo_stado(BRING_UP);
+    globalState.firmware_version = FIRMWARE_VERSION;
 
 }
 

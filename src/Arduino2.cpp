@@ -49,6 +49,7 @@ int ArduinoInter::bring_up() {
 
 int ArduinoInter::setup() {
     pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(PIN3, INPUT_PULLUP);
     return 0;
 }
 
