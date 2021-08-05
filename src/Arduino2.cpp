@@ -208,11 +208,18 @@ void ArduinoInter::read_state(){
         int distance_to_final = abs(this->state.current_floor - this->state.final_floor);
     switch (distance_to_final) {
         case 0:
-            this->state.next_state = STOP;
+            this->state.next_state = STOP_ELE;
             break;
         case 1:
+            if (this->state.slow_censor == true and this->state.leaving_slow == false){
 
-            this->state.next_state = BREAK;
+                this->state.next_state = BREAK_ELE;
+            }
+            this->state.next_state = MOVE_ELE;
+            break;
+
+        default:
+            this->state.next_state = MOVE_ELE;
 
     }
 

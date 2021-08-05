@@ -26,6 +26,12 @@ enum States {
     MOVING = 5,
 };
 
+enum Elevator{
+    MOVE_ELE,
+    STOP_ELE,
+    BREAK_ELE,
+};
+
 enum ArdErrors{
     NO_ERROR,
     SKIP_CENSOR,
