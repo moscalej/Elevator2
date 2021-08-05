@@ -29,6 +29,7 @@ int ElevatorClass::get_command() {
         }
     }
 
+
     return this->command_to_run.command;
 }
 

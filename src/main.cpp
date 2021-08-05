@@ -21,7 +21,9 @@ void setup()
 void loop()
 {
     elevator.blink();
-    while (globalState.errors){
+//    Serial.print(globalState.errors);
+    while (!globalState.errors){
+//        Serial.print(0xb00b);
         run_state_machine(&elevator, &globalState);
     }
 //    run_resolve_error(&elevator, &globalState);

@@ -12,7 +12,7 @@ int GlobalState::proximo_stado(int state) {
 }
 
 int GlobalState::leer_stado() const {
-    if (Serial.available()){
+    if (DEBUG){
         Serial.print(this->current_state );
     }
     return this->current_state;

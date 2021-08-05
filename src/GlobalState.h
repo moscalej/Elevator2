@@ -5,15 +5,8 @@
 #ifndef UNTITLED4_GLOBALSTATE_H
 #define UNTITLED4_GLOBALSTATE_H
 
+#include "config.h"
 
-enum States {
-    BRING_UP = 0,
-    RESET = 1,
-    STAND_BY_CLOSE_DOOR = 2,
-    NO_HAGAS_NADA_PUERTA_ABIERTA = 3,
-    EXECUTING_COMMAND = 4,
-    MOVING = 5,
-};
 
 
 class GlobalState {

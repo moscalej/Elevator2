@@ -7,18 +7,6 @@
 
 #include "Arduino2.h"
 
-enum DoorStatus {
-    OPEN = 1,
-    CLOSE = 0,
-};
-
-enum CommandsNames {
-    NO_COMMAND = 0,
-    MOVE = 1,
-    TURN_LIGHTS = 2,
-
-};
-
 
 
 
