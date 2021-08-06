@@ -64,8 +64,8 @@ int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
     }else{
 
     }
-    bool direction = (from_floor>)
-    this=mov
+    bool direction = (from_floor);
+    this=mov;
 
 
     return 0;
@@ -146,7 +146,7 @@ void ArduinoInter::move_up() {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, HIGH);
     digitalWrite(this->frequency_direction, LOW);
-    digitalWrite(this->frequency_brake, LOW);
+    digitalWrite(this->frequency_brake, HIGH);
 
 }
 
@@ -154,23 +154,22 @@ void ArduinoInter::move_down() {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, HIGH);
     digitalWrite(this->frequency_direction, HIGH);
-    digitalWrite(this->frequency_brake, LOW);
-
+    digitalWrite(this->frequency_brake, HIGH);
 
 }
 
 void ArduinoInter::move_break() {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, LOW);
-    digitalWrite(this->frequency_brake, LOW);
+    digitalWrite(this->frequency_brake, HIGH);
 
 }
 
 void ArduinoInter::move_stop() {
-    digitalWrite(this->frequency_enable, LOW); // NEED to check this
+    digitalWrite(this->frequency_enable, LOW);
     digitalWrite(this->frequency_on, LOW);
-    digitalWrite(this->frequency_brake, HIGH);
-
+    digitalWrite(this->frequency_direction, LOW);
+    digitalWrite(this->frequency_brake, LOW);
 }
 
 bool ArduinoInter::read_floor(int floor_to_read) {
@@ -195,7 +194,7 @@ void ArduinoInter::read_state(){
             this->state.leaving_slow = true;
             break;
         case 1:
-
+            // ACA cambia el piso
             this->state.previous_floor = this->state.current_floor;
             if (this->state.slow_censor){
                 this->state.leaving_slow = false;
