@@ -11,7 +11,7 @@
 
 
 #define MEMORY 5
-typedef struct {
+typedef struct Commandos{
     int command = 0;
     int arguments = 0;
 } Command;
@@ -26,11 +26,7 @@ public:
      */
     int setup();
 
-    /**
-     * This is use for debug
-     * @return
-     */
-    int blink();
+
 
     /**
      * Check if the door is open on any floor
@@ -70,9 +66,15 @@ public:
      */
     int update_current_floor();
 
+    /**
+    * This is use for debug
+    * @return
+    */
+    int blink();
+
 
 private:
-    // Inputs
+    // INPUTS
     ArdInput button_call[MAX_FLOOR] = {ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
                                        ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
                                        ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
@@ -90,21 +92,14 @@ private:
                                  ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
                                  ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY)};
 
-    //output
+    //OUTPUTS
     int door_lock[MAX_FLOOR] = {PIN3, PIN3, PIN3, PIN4, PIN3, PIN3, PIN3, PIN3};
     int frequency_enable = PIN3;
     int frequency_on = PIN3;
     int frequency_direction = PIN3;
     int frequency_brake = PIN3;
 
-    void move_general(int from_floor, int to_floor);
-    void move_up() const;
-    void move_down() const;
-    void move_break() const;
-    void move_stop() const;
-
-
-
+    // STATE MACHINES AND SPEED STATE
     struct {
         int current_floor;
         int previous_floor;
@@ -113,14 +108,24 @@ private:
         int slow_censor;
         int next_state;
         int speed_state;
-    } state;
-    int errors;
+    } state  = {0,0,0, CLOSE,
+                LOW, START_MOVE,ON_CENSOR};
 
+    int errors{0};
+
+    //STATE MANAGEMENT FUNCTIONS
     void update_elevator_state();
-    int get_state_machine() const;
     void update_state_machine(int next_state);
+    int get_state_machine() const;
 
+    // OUTPUT FUNCTIONS
     void unlock_door(int lock_number);
+    void move_general(int from_floor, int to_floor);
+    void move_up() const;
+    void move_down() const;
+    void move_break() const;
+    void move_stop() const;
+
 };
 
 

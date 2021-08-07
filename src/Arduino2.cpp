@@ -15,21 +15,13 @@ Command ArduinoInter::check_buttons() {
     comando.command = NO_COMMAND;
 
 
-    if (DEBUG) {
-        if (Serial.available()) {
-            comando.command = Serial.parseInt();
-            comando.arguments = Serial.parseInt();
-
-        }
-        this->blink();
-    } else {
-        for (int button = 0; button < MAX_FLOOR; ++button) {
-            if (this->button_call[button].read_input() == HIGH) {
-                comando.command = MOVE;
-                comando.arguments = button;
-            }
+    for (int button = 0; button < MAX_FLOOR; ++button) {
+        if (this->button_call[button].read_input() == HIGH) {
+            comando.command = MOVE;
+            comando.arguments = button;
         }
     }
+
 
     return comando;
 }
@@ -51,7 +43,6 @@ int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
     bool moving = true;
     int distance_to_final;
     bool door_state;
-
 
 
     while (moving) {
@@ -150,9 +141,6 @@ int ArduinoInter::get_door_status() {
     return CLOSE;
 }
 
-int ArduinoInter::get_errors() const {
-    return this->errors;
-}
 
 
 int ArduinoInter::setup() {
@@ -178,48 +166,6 @@ int ArduinoInter::setup() {
 
     return 0;
 }
-
-int ArduinoInter::blink() {
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    // wait for a second
-    delay(500);
-
-    // turn the LED off by making the voltage LOW
-    digitalWrite(LED_BUILTIN, LOW);
-
-    // wait for a second
-    delay(500);
-    return 0;
-}
-
-void ArduinoInter::move_up() const {
-    digitalWrite(this->frequency_enable, HIGH);
-    digitalWrite(this->frequency_on, HIGH);
-    digitalWrite(this->frequency_direction, LOW);
-    digitalWrite(this->frequency_brake, HIGH);
-}
-
-void ArduinoInter::move_down() const {
-    digitalWrite(this->frequency_enable, HIGH);
-    digitalWrite(this->frequency_on, HIGH);
-    digitalWrite(this->frequency_direction, HIGH);
-    digitalWrite(this->frequency_brake, HIGH);
-}
-
-void ArduinoInter::move_break() const {
-    digitalWrite(this->frequency_enable, HIGH);
-    digitalWrite(this->frequency_on, LOW);
-    digitalWrite(this->frequency_brake, HIGH);
-}
-
-void ArduinoInter::move_stop() const {
-    digitalWrite(this->frequency_enable, LOW);
-    digitalWrite(this->frequency_on, LOW);
-    digitalWrite(this->frequency_direction, LOW);
-    digitalWrite(this->frequency_brake, LOW);
-}
-
 
 void ArduinoInter::update_elevator_state() {
 
@@ -259,6 +205,7 @@ void ArduinoInter::update_elevator_state() {
             this->state.previous_floor = this->state.current_floor;
             this->state.speed_state = ON_CENSOR;
         default:
+            // ACA hay uno problema de faltar un error pero igual el programa fuinciona
             this->state.previous_floor = this->state.current_floor;
             this->state.speed_state = ON_CENSOR;
             this->errors = SKIP_CENSOR;
@@ -267,6 +214,7 @@ void ArduinoInter::update_elevator_state() {
 }
 
 int ArduinoInter::update_current_floor() {
+
     int counter = 0;
     int current_floor;
     for (int floor_number = 0; floor_number < MAX_FLOOR; ++floor_number) {
@@ -282,9 +230,6 @@ int ArduinoInter::update_current_floor() {
     return current_floor;
 }
 
-int ArduinoInter::get_state_machine() const {
-    return this->state.next_state;
-}
 
 void ArduinoInter::move_general(int from_floor, int to_floor) {
     if (from_floor == to_floor) {
@@ -306,4 +251,53 @@ void ArduinoInter::unlock_door(int lock_number) {
     digitalWrite(this->door_lock[lock_number], HIGH);
 }
 
+int ArduinoInter::get_state_machine() const {
+    return this->state.next_state;
+}
 
+void ArduinoInter::move_up() const {
+    digitalWrite(this->frequency_enable, HIGH);
+    digitalWrite(this->frequency_on, HIGH);
+    digitalWrite(this->frequency_direction, LOW);
+    digitalWrite(this->frequency_brake, HIGH);
+}
+
+
+void ArduinoInter::move_down() const {
+    digitalWrite(this->frequency_enable, HIGH);
+    digitalWrite(this->frequency_on, HIGH);
+    digitalWrite(this->frequency_direction, HIGH);
+    digitalWrite(this->frequency_brake, HIGH);
+}
+
+void ArduinoInter::move_break() const {
+    digitalWrite(this->frequency_enable, HIGH);
+    digitalWrite(this->frequency_on, LOW);
+    digitalWrite(this->frequency_brake, HIGH);
+}
+
+void ArduinoInter::move_stop() const {
+    digitalWrite(this->frequency_enable, LOW);
+    digitalWrite(this->frequency_on, LOW);
+    digitalWrite(this->frequency_direction, LOW);
+    digitalWrite(this->frequency_brake, LOW);
+}
+
+
+int ArduinoInter::blink() {
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    // wait for a second
+    delay(500);
+
+    // turn the LED off by making the voltage LOW
+    digitalWrite(LED_BUILTIN, LOW);
+
+    // wait for a second
+    delay(500);
+    return 0;
+}
+
+int ArduinoInter::get_errors() const {
+    return this->errors;
+}

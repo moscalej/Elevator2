@@ -7,7 +7,7 @@
 
 int ElevatorClass::bring_up() {
 
-    return this->arduino.bring_up();
+    return 0;
 }
 
 void ElevatorClass::reset() {
@@ -17,7 +17,7 @@ void ElevatorClass::reset() {
 int ElevatorClass::get_door_status() {
     int status;
     status = this->arduino.get_door_status();
-    this->is_door_open = (status == 1 ) ? OPEN : CLOSE;
+    this->is_door_open = (status == OPEN ) ? OPEN : CLOSE;
     return this->is_door_open;
 }
 
@@ -34,13 +34,13 @@ int ElevatorClass::get_command() {
 }
 
 void ElevatorClass::run_command() {
-    int current_floor;
+    int read_current_floor;
 
     switch (this->command_to_run.command) {
         case (MOVE):
             this->arduino.move_to_floor(this->current_floor, this->command_to_run.arguments);
             current_floor = this->arduino.update_current_floor();
-            if (current_floor != command_to_run.arguments){
+            if (read_current_floor != command_to_run.arguments){
                 // need to handle the errors better
                 this->errors = NO_ERROR;
             }
