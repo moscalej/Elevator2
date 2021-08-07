@@ -27,14 +27,28 @@ enum States {
 };
 
 enum Elevator{
+    START_MOVE,
     MOVE_ELE,
     STOP_ELE,
     BREAK_ELE,
+    OPEN_DOOR_ELE,
+    FINISH_ELE,
+};
+
+enum ElevatorSpeed{
+    LEAVING_SLOW,
+    FAST,
+    ENTERING_SLOW,
+    ON_CENSOR,
 };
 
 enum ArdErrors{
     NO_ERROR,
     SKIP_CENSOR,
+    WRONG_ELEVATOR_STATE,
+    MULTIPLE_FLOOR_CENSOR_READ,
+    UNKNOW_SPEED_STATE,
+    MISS_BREAK_STATE,
 };
 
 

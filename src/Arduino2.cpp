@@ -12,23 +12,22 @@
 
 Command ArduinoInter::check_buttons() {
     Command comando;
-    comando.command = 0;
+    comando.command = NO_COMMAND;
 
 
-    if (DEBUG){
-        if (Serial.available()){
+    if (DEBUG) {
+        if (Serial.available()) {
             comando.command = Serial.parseInt();
             comando.arguments = Serial.parseInt();
 
         }
         this->blink();
-    }else{
+    } else {
         for (int button = 0; button < MAX_FLOOR; ++button) {
-            if (this->read_button(button)){
+            if (this->button_call[button].read_input() == HIGH) {
                 comando.command = MOVE;
                 comando.arguments = button;
             }
-            
         }
     }
 
@@ -48,24 +47,75 @@ Command ArduinoInter::check_buttons() {
  */
 int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
 
+    int current_state = this->get_state_machine();
+    int distance_to_final;
+    bool door_state = this->get_door_status();
+    this->update_elevator_state();
+    switch (current_state) {
 
-    if (to_floor == from_floor){
-
-    }else if (to_floor > from_floor){
-        int count = to_floor - from_floor;
-        this->move_up();
-        while (!digitalRead(this->accelerator_censor)){
-            this->move_break();
-            if (this->read_floor(this->next_floor)){
-
+        case START_MOVE:
+            this->state.speed_state = ON_CENSOR;
+            if (from_floor == to_floor) {
+                this->update_state_machine(OPEN_DOOR_ELE);
             }
-        }
+            this->update_state_machine(MOVE_ELE);
 
-    }else{
+        case MOVE_ELE:
+
+            distance_to_final = abs(this->state.current_floor - this->state.final_floor);
+            switch (distance_to_final) {
+
+                case 0:
+
+                    this->update_state_machine(STOP_ELE);
+                    this->errors = MISS_BREAK_STATE;
+                    break;
+
+                case 1:
+                    if (this->state.speed_state == ENTERING_SLOW) {
+                        this->update_state_machine(BREAK_ELE);
+                    } else {
+                        this->update_state_machine(MOVE_ELE);
+                    }
+                    break;
+
+
+                default:
+                    this->state.next_state = MOVE_ELE;
+                    break;
+            }
+            this->move_general(from_floor, to_floor);
+
+
+        case BREAK_ELE:
+            switch (this->state.speed_state) {
+                case ON_CENSOR:
+                    this->update_state_machine(STOP_ELE);
+                    break;
+                default:
+                    //solo por seguridad
+                    if (this->state.current_floor == to_floor){
+                        this->update_state_machine(STOP_ELE);
+                    }
+                    break;
+            }
+
+            this->move_break();
+            break;
+        case STOP_ELE:
+            this->move_stop();
+            this->update_state_machine(OPEN_DOOR_ELE);
+            break;
+        case OPEN_DOOR_ELE:
+            this->unlock_door(this->state.current_floor);
+            if (door_state== OPEN){
+                this->update_state_machine(FINISH_ELE);
+            }
+        default:
+            this->errors = WRONG_ELEVATOR_STATE;
 
     }
-    bool direction = (from_floor);
-    this=mov;
+    this->update_elevator_state();
 
 
     return 0;
@@ -79,35 +129,32 @@ int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
  */
 int ArduinoInter::get_door_status() {
     for (int i = 0; i < MAX_FLOOR; ++i) {
-        if (digitalRead(this->door_censor[i])){
+        if (this->door_censor[i].read_input() == HIGH) {
             return OPEN;
         }
     }
     return CLOSE;
 }
 
-int ArduinoInter::get_errors() {
-    return 0;
+int ArduinoInter::get_errors() const {
+    return this->errors;
 }
 
-int ArduinoInter::bring_up() {
-    return 0;
-}
 
 int ArduinoInter::setup() {
 
     Serial.begin(9600);
 
     // Setting pins for the inputs
-    for (int i  = 0; i < MAX_FLOOR ; ++i) {
-        pinMode(this->floor[i], INPUT_PULLUP);
-        pinMode(this->button_call[i], INPUT_PULLUP);
-        pinMode(this->door_censor[i], INPUT_PULLUP);
+    for (int i = 0; i < MAX_FLOOR; ++i) {
+        this->floor[i].setup();
+        this->button_call[i].setup();
+        this->door_censor[i].setup();
     }
-    pinMode(this->accelerator_censor, INPUT_PULLUP);
+    this->accelerator_censor.setup();
 
     // Setting output
-    for (int i  = 0; i < MAX_FLOOR ; ++i) {
+    for (int i = 0; i < MAX_FLOOR; ++i) {
         pinMode(this->door_lock[i], OUTPUT);
     }
     pinMode(this->frequency_enable, OUTPUT);
@@ -132,99 +179,117 @@ int ArduinoInter::blink() {
     return 0;
 }
 
-bool ArduinoInter::read_button(int button_number) {
-    if (digitalRead(button_number)){
-        delay(1);
-        if (digitalRead(button_number)){
-            return true;
-        }
-    }
-    return false;
-}
-
-void ArduinoInter::move_up() {
+void ArduinoInter::move_up() const {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, HIGH);
     digitalWrite(this->frequency_direction, LOW);
     digitalWrite(this->frequency_brake, HIGH);
-
 }
 
-void ArduinoInter::move_down() {
+void ArduinoInter::move_down() const {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, HIGH);
     digitalWrite(this->frequency_direction, HIGH);
     digitalWrite(this->frequency_brake, HIGH);
-
 }
 
-void ArduinoInter::move_break() {
+void ArduinoInter::move_break() const {
     digitalWrite(this->frequency_enable, HIGH);
     digitalWrite(this->frequency_on, LOW);
     digitalWrite(this->frequency_brake, HIGH);
-
 }
 
-void ArduinoInter::move_stop() {
+void ArduinoInter::move_stop() const {
     digitalWrite(this->frequency_enable, LOW);
     digitalWrite(this->frequency_on, LOW);
     digitalWrite(this->frequency_direction, LOW);
     digitalWrite(this->frequency_brake, LOW);
 }
 
-bool ArduinoInter::read_floor(int floor_to_read) {
 
-    if (digitalRead(this->door_censor[floor_to_read])){
-        return true;
-    }
-    return false;
-}
+void ArduinoInter::update_elevator_state() {
 
-void ArduinoInter::read_state(){
-    for (int i = 0; i < MAX_FLOOR; ++i) {
-        if (digitalRead(this->floor[i])){
-            this->state.current_floor = i;
-            }
-        }
-    this->state.slow_censor = digitalRead(this->accelerator_censor);
+    this->state.current_floor = this->update_current_floor();
+    this->state.slow_censor = this->accelerator_censor.read_input();
+    this->state.is_door_open = this->get_door_status();
+
     int distance = abs(this->state.previous_floor - this->state.current_floor);
 
     switch (distance) {
         case 0:
-            this->state.leaving_slow = true;
+            if (this->state.slow_censor == HIGH) {
+                switch (this->state.speed_state) {
+                    case ON_CENSOR:
+                        this->state.speed_state = LEAVING_SLOW;
+                        break;
+                    case LEAVING_SLOW:
+                        this->state.speed_state = LEAVING_SLOW;
+                        break;
+                    case FAST:
+                        this->state.speed_state = ENTERING_SLOW;
+                        break;
+                    case ENTERING_SLOW:
+                        this->state.speed_state = ENTERING_SLOW;
+                        break;
+                    default:
+                        this->errors = UNKNOW_SPEED_STATE;
+
+                }
+            } else {
+                this->state.speed_state = FAST;
+            }
+
             break;
         case 1:
-            // ACA cambia el piso
+            // llegal al piso
             this->state.previous_floor = this->state.current_floor;
-            if (this->state.slow_censor){
-                this->state.leaving_slow = false;
-
-            }
-            default:
-                this->errors = SKIP_CENSOR;
-    }
-
-        int distance_to_final = abs(this->state.current_floor - this->state.final_floor);
-    switch (distance_to_final) {
-        case 0:
-            this->state.next_state = STOP_ELE;
-            break;
-        case 1:
-            if (this->state.slow_censor == true and this->state.leaving_slow == false){
-
-                this->state.next_state = BREAK_ELE;
-            }
-            this->state.next_state = MOVE_ELE;
-            break;
-
+            this->state.speed_state = ON_CENSOR;
         default:
-            this->state.next_state = MOVE_ELE;
-
+            this->state.previous_floor = this->state.current_floor;
+            this->state.speed_state = ON_CENSOR;
+            this->errors = SKIP_CENSOR;
     }
-
-
-
-    this->state.slow_censor = digitalRead(this->accelerator_censor);
-
 
 }
+
+int ArduinoInter::update_current_floor() {
+    int counter = 0;
+    int current_floor;
+    for (int floor_number = 0; floor_number < MAX_FLOOR; ++floor_number) {
+        if (this->floor[floor_number].read_input() == HIGH) {
+            this->state.current_floor = floor_number;
+            current_floor = floor_number;
+            counter++;
+        }
+    }
+    if (counter > 1) {
+        this->errors = MULTIPLE_FLOOR_CENSOR_READ;
+    }
+    return current_floor;
+}
+
+int ArduinoInter::get_state_machine() const {
+    return this->state.next_state;
+}
+
+void ArduinoInter::move_general(int from_floor, int to_floor) {
+    if (from_floor == to_floor) {
+        this->move_break();
+    } else if (from_floor < to_floor) {
+        move_up();
+    } else {
+        move_down();
+    }
+
+}
+
+void ArduinoInter::update_state_machine(int next_state) {
+    this->state.next_state = next_state;
+
+}
+
+void ArduinoInter::unlock_door(int lock_number) {
+
+}
+
+
