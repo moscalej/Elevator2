@@ -47,76 +47,90 @@ Command ArduinoInter::check_buttons() {
  */
 int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
 
-    int current_state = this->get_state_machine();
+    this->update_state_machine(START_MOVE);
+    bool moving = true;
     int distance_to_final;
-    bool door_state = this->get_door_status();
-    this->update_elevator_state();
-    switch (current_state) {
+    bool door_state;
 
-        case START_MOVE:
-            this->state.speed_state = ON_CENSOR;
-            if (from_floor == to_floor) {
-                this->update_state_machine(OPEN_DOOR_ELE);
-            }
-            this->update_state_machine(MOVE_ELE);
 
-        case MOVE_ELE:
 
-            distance_to_final = abs(this->state.current_floor - this->state.final_floor);
-            switch (distance_to_final) {
+    while (moving) {
 
-                case 0:
 
+        this->update_elevator_state();
+        switch (this->get_state_machine()) {
+
+            case START_MOVE:
+                this->state.speed_state = ON_CENSOR;
+                if (from_floor == to_floor) {
                     this->update_state_machine(STOP_ELE);
-                    this->errors = MISS_BREAK_STATE;
-                    break;
+                }
+                this->state.current_floor = from_floor;
+                this->state.final_floor = to_floor;
+                this->state.previous_floor = from_floor;
+                this->state.is_door_open = false;
+                this->update_state_machine(MOVE_ELE);
 
-                case 1:
-                    if (this->state.speed_state == ENTERING_SLOW) {
-                        this->update_state_machine(BREAK_ELE);
-                    } else {
-                        this->update_state_machine(MOVE_ELE);
-                    }
-                    break;
+            case MOVE_ELE:
 
+                distance_to_final = abs(this->state.current_floor - this->state.final_floor);
+                switch (distance_to_final) {
 
-                default:
-                    this->state.next_state = MOVE_ELE;
-                    break;
-            }
-            this->move_general(from_floor, to_floor);
+                    case 0:
 
-
-        case BREAK_ELE:
-            switch (this->state.speed_state) {
-                case ON_CENSOR:
-                    this->update_state_machine(STOP_ELE);
-                    break;
-                default:
-                    //solo por seguridad
-                    if (this->state.current_floor == to_floor){
                         this->update_state_machine(STOP_ELE);
-                    }
-                    break;
-            }
+                        this->errors = MISS_BREAK_STATE;
+                        break;
 
-            this->move_break();
-            break;
-        case STOP_ELE:
-            this->move_stop();
-            this->update_state_machine(OPEN_DOOR_ELE);
-            break;
-        case OPEN_DOOR_ELE:
-            this->unlock_door(this->state.current_floor);
-            if (door_state== OPEN){
-                this->update_state_machine(FINISH_ELE);
-            }
-        default:
-            this->errors = WRONG_ELEVATOR_STATE;
+                    case 1:
+                        if (this->state.speed_state == ENTERING_SLOW) {
+                            this->update_state_machine(BREAK_ELE);
+                        } else {
+                            this->update_state_machine(MOVE_ELE);
+                        }
+                        break;
 
+
+                    default:
+                        this->state.next_state = MOVE_ELE;
+                        break;
+                }
+                this->move_general(from_floor, to_floor);
+
+
+            case BREAK_ELE:
+                switch (this->state.speed_state) {
+                    case ON_CENSOR:
+                        this->update_state_machine(STOP_ELE);
+                        break;
+                    default:
+                        //solo por seguridad
+                        if (this->state.current_floor == to_floor) {
+                            this->update_state_machine(STOP_ELE);
+                        }
+                        break;
+                }
+
+                this->move_break();
+                break;
+            case STOP_ELE:
+                this->move_stop();
+                this->update_state_machine(OPEN_DOOR_ELE);
+                break;
+            case OPEN_DOOR_ELE:
+                door_state = this->get_door_status();
+                this->unlock_door(this->state.current_floor);
+                if (door_state == OPEN) {
+                    this->update_state_machine(FINISH_ELE);
+                }
+            case FINISH_ELE:
+
+                moving = false;
+            default:
+                this->errors = WRONG_ELEVATOR_STATE;
+
+        }
     }
-    this->update_elevator_state();
-
 
     return 0;
 }
@@ -289,7 +303,7 @@ void ArduinoInter::update_state_machine(int next_state) {
 }
 
 void ArduinoInter::unlock_door(int lock_number) {
-
+    digitalWrite(this->door_lock[lock_number], HIGH);
 }
 
 

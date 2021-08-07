@@ -45,10 +45,7 @@ private:
     Command command_to_run;
 };
 
-enum Errors {
-    NO_ERROR,
 
-};
 
 
 #endif //UNTITLED4_ELEVATORCLASS_H

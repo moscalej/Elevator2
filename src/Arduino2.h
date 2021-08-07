@@ -64,12 +64,15 @@ public:
      */
     int get_errors() const;
 
-//    int bring_up();
+    /**
+     * Will update the current floor
+     * from the last read floor censor
+     */
+    int update_current_floor();
 
 
 private:
     // Inputs
-//    int floor[MAX_FLOOR] = {PIN3, PIN3, PIN3, PIN3, PIN3, PIN3, PIN3, PIN3};
     ArdInput button_call[MAX_FLOOR] = {ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
                                        ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
                                        ArdInput(PIN0, MEMORY), ArdInput(PIN0, MEMORY),
@@ -101,18 +104,10 @@ private:
     void move_stop() const;
 
 
-    bool read_open_door_censor(int floor_to_read);
-
-    /**
-     * Will update the current floor
-     * from the last read floor censor
-     */
-    int update_current_floor();
 
     struct {
         int current_floor;
         int previous_floor;
-        int next_floor;
         int final_floor;
         bool is_door_open;
         int slow_censor;

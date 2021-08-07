@@ -34,10 +34,16 @@ int ElevatorClass::get_command() {
 }
 
 void ElevatorClass::run_command() {
+    int current_floor;
 
     switch (this->command_to_run.command) {
         case (MOVE):
             this->arduino.move_to_floor(this->current_floor, this->command_to_run.arguments);
+            current_floor = this->arduino.update_current_floor();
+            if (current_floor != command_to_run.arguments){
+                // need to handle the errors better
+                this->errors = NO_ERROR;
+            }
             this->current_floor = command_to_run.arguments;
             break;
 
