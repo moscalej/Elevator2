@@ -13,7 +13,7 @@ enum DoorStatus {
 enum CommandsNames {
     NO_COMMAND = 0,
     MOVE = 1,
-    TURN_LIGHTS = 2,
+//    TURN_LIGHTS = 2,
 
 };
 
@@ -23,7 +23,7 @@ enum States {
     STAND_BY_CLOSE_DOOR = 2,
     NO_HAGAS_NADA_PUERTA_ABIERTA = 3,
     EXECUTING_COMMAND = 4,
-    MOVING = 5,
+//    MOVING = 5,
 };
 
 enum Elevator{

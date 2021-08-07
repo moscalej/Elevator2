@@ -47,8 +47,8 @@ int run_state_machine(ElevatorClass *elevator, GlobalState *globalState) {
 
     }
 
-    if (elevator->get_erros() == NO_ERROR) {
-        globalState->errors = elevator->get_erros();
+    if (elevator->get_errors() == NO_ERROR) {
+        globalState->errors = elevator->get_errors();
         return -1;
     }
     return 0;

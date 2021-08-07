@@ -20,7 +20,7 @@ public:
     /**
      * This method will set the pin as a pull up input
      */
-    void setup();
+    void setup() const;
 
 private:
     int counter;

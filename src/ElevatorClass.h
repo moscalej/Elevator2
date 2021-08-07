@@ -8,22 +8,17 @@
 #include "Arduino2.h"
 
 
-
-
 class ElevatorClass {
 
 public:
     int current_floor = 0;
-    bool running = false;
 
-    int destination_floor = 0;
+//    int destination_floor = 0;
     bool is_door_open = true;
 
 
-    int update_elevator_state(int elevatorState);
-
     // Se tienen que definir
-    int bring_up();
+    static int bring_up();
 
     void reset();
 
@@ -33,19 +28,18 @@ public:
 
     void run_command();
 
-    int get_erros();
+    int get_errors() const;
+
     int setup();
 
-    int blink();
+    static int blink();
 
 private:
     ArduinoInter arduino;
-    int errors;
-    bool commando_en_espera;
+    int errors{0};
+    bool commando_en_espera = false;
     Command command_to_run;
 };
-
-
 
 
 #endif //UNTITLED4_ELEVATORCLASS_H

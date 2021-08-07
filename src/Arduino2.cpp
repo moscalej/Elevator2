@@ -133,14 +133,13 @@ int ArduinoInter::move_to_floor(int from_floor, int to_floor) {
  *          0 si la puerta esta cerrada
  */
 int ArduinoInter::get_door_status() {
-    for (int i = 0; i < MAX_FLOOR; ++i) {
-        if (this->door_censor[i].read_input() == HIGH) {
+    for (auto &censor : this->door_censor) {
+        if (censor.read_input() == HIGH) {
             return OPEN;
         }
     }
     return CLOSE;
 }
-
 
 
 int ArduinoInter::setup() {
@@ -152,13 +151,13 @@ int ArduinoInter::setup() {
         this->floor[i].setup();
         this->button_call[i].setup();
         this->door_censor[i].setup();
+        // Setting output
+        pinMode(this->door_lock[i], OUTPUT);
     }
     this->accelerator_censor.setup();
 
-    // Setting output
-    for (int i = 0; i < MAX_FLOOR; ++i) {
-        pinMode(this->door_lock[i], OUTPUT);
-    }
+
+    // SETTING OUTPUT
     pinMode(this->frequency_enable, OUTPUT);
     pinMode(this->frequency_on, OUTPUT);
     pinMode(this->frequency_direction, OUTPUT);
@@ -179,20 +178,21 @@ void ArduinoInter::update_elevator_state() {
         case 0:
             if (this->state.slow_censor == HIGH) {
                 switch (this->state.speed_state) {
-                    case ON_CENSOR:
-                        this->state.speed_state = LEAVING_SLOW;
-                        break;
-                    case LEAVING_SLOW:
-                        this->state.speed_state = LEAVING_SLOW;
-                        break;
                     case FAST:
                         this->state.speed_state = ENTERING_SLOW;
+                        break;
+                    case ON_CENSOR :
+                        this->state.speed_state = LEAVING_SLOW;
                         break;
                     case ENTERING_SLOW:
                         this->state.speed_state = ENTERING_SLOW;
                         break;
+                    case LEAVING_SLOW:
+                        this->state.speed_state = LEAVING_SLOW;
+                        break;
                     default:
                         this->errors = UNKNOW_SPEED_STATE;
+                        break;
 
                 }
             } else {
@@ -204,11 +204,13 @@ void ArduinoInter::update_elevator_state() {
             // llegal al piso
             this->state.previous_floor = this->state.current_floor;
             this->state.speed_state = ON_CENSOR;
+            break;
         default:
             // ACA hay uno problema de faltar un error pero igual el programa fuinciona
             this->state.previous_floor = this->state.current_floor;
             this->state.speed_state = ON_CENSOR;
             this->errors = SKIP_CENSOR;
+            break;
     }
 
 }

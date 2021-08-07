@@ -70,7 +70,7 @@ public:
     * This is use for debug
     * @return
     */
-    int blink();
+    static int blink();
 
 
 private:

@@ -12,7 +12,7 @@ ArdInput::ArdInput(int pin_number, int memory) {
 
 }
 
-void ArdInput::setup() {
+void ArdInput::setup() const {
     pinMode(this->pin_number, INPUT_PULLUP);
 }
 

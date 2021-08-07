@@ -13,7 +13,6 @@ class GlobalState {
 public:
     int firmware_version = 0;
     int current_state = BRING_UP;
-    int last_state = RESET;
     bool fatalError = false;
     int errors;
 
